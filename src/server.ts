@@ -1,18 +1,21 @@
-import express, { Request, Response, NextFunction } from "express";
-import logger from "./utils/logger";
+import express, { Request, Response, NextFunction } from 'express';
+import logger from './utils/logger';
 import jwt from 'jsonwebtoken';
+import authRoutes from './routes';
 
 const app = express();
 const port = 3000;
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   logger.info(`${req.method} ${req.url}`);
-  res.on("finish", () => {
+  res.on('finish', () => {
     logger.info(`${req.method} ${res.statusCode} ${req.url}`);
   });
   next();
 });
 app.use(express.json());
+
+app.use('/auth', authRoutes);
 
 const secretKey = 'your_secret_key';
 
@@ -47,7 +50,7 @@ app.post('/login', (req: Request, res: Response) => {
 
 app.get('/', (req: Request, res: Response) => {
   const data = {
-    message: "Hello, world!",
+    message: 'Hello, world!',
   };
   res.json(data);
 });
@@ -55,9 +58,9 @@ app.get('/', (req: Request, res: Response) => {
 // Protect the /api/items route with JWT authentication
 app.get('/api/items', authenticateJWT, (req: Request, res: Response) => {
   const data = [
-    { id: 1, name: "item1" },
-    { id: 2, name: "item2" },
-    { id: 3, name: "item3" },
+    { id: 1, name: 'item1' },
+    { id: 2, name: 'item2' },
+    { id: 3, name: 'item3' },
   ];
   res.json(data);
 });
@@ -65,13 +68,13 @@ app.get('/api/items', authenticateJWT, (req: Request, res: Response) => {
 // Protect the /api/items POST route with JWT authentication
 app.post('/api/items', authenticateJWT, (req: Request, res: Response) => {
   const newItem = req.body.item;
-  res.status(201).json({ message: "Item created", item: newItem });
+  res.status(201).json({ message: 'Item created', item: newItem });
 });
 
 // Middleware to log errors
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error(err.message);
-  res.status(500).send("Something went wrong!");
+  res.status(500).send('Something went wrong!');
 });
 
 app.listen(port, () => {
